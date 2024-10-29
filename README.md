@@ -1,66 +1,149 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# JWT Authentication in Laravel 11
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project demonstrates how to implement JWT (JSON Web Token) authentication in a Laravel 11 application using the `tymon/jwt-auth` package.
 
-## About Laravel
+## Prerequisites
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP >= 8.2
+- SQLite or any other supported database
+- Laravel 11
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Clone the Repository**
+   ```bash
+   git clone https://github.com/shakhawatmollah/laravel-jwt-app.git
+   cd laravel-jwt-app
+   ```
+### Running the Application
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Serve the Application**
+   ```bash
+   php artisan serve
+   ```
 
-## Learning Laravel
+Postman Collection: [laravel-jwt-app.postman_collection.json](laravel-jwt-app.postman_collection.json)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+------------------------------------
+## Installation
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. **Create a New Laravel Project**
+   ```bash
+   laravel new laravel-jwt-app
+   cd laravel-jwt-app
+   ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **Install Required Packages and Set Up API**
+    - Install base dependencies and set up API functionality:
+      ```bash
+      php artisan install:api
+      ```
 
-## Laravel Sponsors
+    - Add JWT support with `tymon/jwt-auth`:
+      ```bash
+      composer require tymon/jwt-auth
+      ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. **Publish JWT Configuration**
+   ```bash
+   php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
+   ```
 
-### Premium Partners
+   This command will publish the `jwt.php` configuration file to your `config` directory.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+4. **Generate JWT Secret Key**
+   ```bash
+   php artisan jwt:secret
+   ```
 
-## Contributing
+   This command will generate a secret key for signing tokens, adding it to your `.env` file as `JWT_SECRET`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+5. **Create the JWT Authentication Controller**
+   ```bash
+   php artisan make:controller JWTAuthController
+   ```
 
-## Code of Conduct
+## JWT Authentication Setup
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+To configure JWT authentication, update the `JWTAuthController` with the following methods:
 
-## Security Vulnerabilities
+- **Register**: Allows new users to sign up.
+- **Login**: Generates a JWT for authenticated users.
+- **Logout**: Invalidates the JWT, logging out the user.
+- **Refresh**: Refreshes the token to extend the session.
+- **Get User**: Gets the currently authenticated user.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Ensure routes for these methods are secured using middleware in `routes/api.php`.
 
-## License
+### Example Routes
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Define API routes for JWT actions in `routes/api.php`:
+
+```php
+use App\Http\Controllers\JWTAuthController;
+
+Route::group(['prefix' => 'auth'], function ($router) {
+    Route::post('register', [JWTAuthController::class, 'register']);
+    Route::post('login', [JWTAuthController::class, 'login']);
+});
+
+Route::middleware(['auth:api'])->group(function () {
+    Route::get('me', [JWTAuthController::class, 'getUser']);
+    Route::post('refresh', [JWTAuthController::class, 'refresh']);
+    Route::post('logout', [JWTAuthController::class, 'logout']);
+});
+```
+
+### Middleware Configuration
+
+Ensure `auth:api` middleware is applied to routes requiring authentication. This middleware verifies the token for secured access.
+
+## API Endpoints
+
+- **Register a User**
+    - `POST /api/auth/register`
+    - Request Body: `{ "name": "username", "email": "user@example.com", "password": "yourpassword" }`
+
+- **Login**
+    - `POST /api/auth/login`
+    - Request Body: `{ "email": "user@example.com", "password": "yourpassword" }`
+
+- **Logout**
+    - `POST /api/logout` – Requires Bearer Token in the Authorization header.
+
+- **Refresh Token**
+    - `POST /api/refresh` – Requires Bearer Token in the Authorization header.
+
+- **Get User**
+    - `GET /api/me` – Requires Bearer Token in the Authorization header.
+
+## Testing the API
+
+To test the API, use **Postman** or any other API client. Make sure to include the JWT token in the Authorization header as a Bearer token for routes that require authentication.
+
+Postman Collection: [laravel-jwt-app.postman_collection.json](laravel-jwt-app.postman_collection.json)
+
+### Example Header
+```plaintext
+Authorization: Bearer your_jwt_token
+```
+
+## Additional Configuration
+
+You can adjust JWT expiration time, blacklist behavior, and other settings in `config/jwt.php`.
+
+## Running the Application
+
+1. **Serve the Application**
+   ```bash
+   php artisan serve
+   ```
+
+2. **Test Endpoints**
+
+   Use the API endpoints to register, log in, and access secured routes with JWT.
+
+## References
+https://jwt-auth.readthedocs.io/en/develop/quick-start/
+
+## Author
+
+Shakhawat Mollah
