@@ -51,7 +51,10 @@ class JWTAuthController extends Controller
             // (optional) Attach the role to the token.
             $token = JWTAuth::fromUser($user);
 
-            return $this->respondWithToken($token);
+            return response()->json([
+                'user' => $user, 
+                'token' => $this->respondWithToken($token)
+            ]);
 
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);

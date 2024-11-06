@@ -1,6 +1,4 @@
-# JWT Authentication in Laravel 11
-
-This project demonstrates how to implement JWT (JSON Web Token) authentication in a Laravel 11 application using the `tymon/jwt-auth` package.
+# JWT Authentication in Laravel 1s project demonstrates how to implement JWT (JSON Web Token) authentication in a Laravel 11 application using the `tymon/jwt-auth` package.
 
 ## Prerequisites
 
